@@ -9,8 +9,9 @@ server.on('connection', (socket) => {
     players[playerId] = { x: 0, y: 0, z: 0, rx: 0, ry: 0 };
 
     socket.playerId = playerId;
-
+    
     socket.send(JSON.stringify({ type: "init", id: playerId, players }));
+    console.log(`Player ${socket.playerId} connected`);
 
     broadcast(JSON.stringify({ type: "new_player", id: playerId, position: players[playerId] }), socket);
 
@@ -29,6 +30,9 @@ server.on('connection', (socket) => {
                     broadcast(JSON.stringify({ type: "update", id: data.id, position: players[data.id] }), socket);
                 }
             }
+            else if (data.type === "disconnect") {
+                removePlayer(socket);
+            }
         } catch (error) {
             console.error("Error parsing message:", error);
         }
@@ -41,6 +45,12 @@ server.on('connection', (socket) => {
         broadcast(JSON.stringify({ type: "remove", id: socket.playerId }));
     });
 
+    function removePlayer(socket) {
+        if (!players[socket.playerId]) return;
+        console.log(`Player ${socket.playerId} disconnected`);
+        delete players[socket.playerId];
+        broadcast(JSON.stringify({ type: "remove", id: socket.playerId }));
+    }
     function broadcast(msg, sender = null) {
         server.clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN && client !== sender) {
