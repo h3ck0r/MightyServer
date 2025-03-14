@@ -1,0 +1,3 @@
+A very basic WebSocket server for MightyEngine
+
+It is in a very active stage of development. Everything is subject to change. A meaningful description will be added later...
